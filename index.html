@@ -1,52 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Pad Frame">
 <title>Pad Frame</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #000; overflow: hidden; font-family: -apple-system, sans-serif; }
-#slideshow { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; }
-#imgA, #imgB { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-#imgA { opacity: 1; z-index: 1; }
-#imgB { opacity: 0; z-index: 2; }
-#clock { position: fixed; bottom: 30px; right: 30px; text-align: right; z-index: 100; pointer-events: none; }
-#clock .time { color: #fff; font-size: 64px; font-weight: 200; letter-spacing: 3px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
-#clock .date { color: #fff; font-size: 26px; font-weight: 300; letter-spacing: 1px; margin-top: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
-#overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 20; justify-content: center; align-items: center; }
-#overlay.show { display: flex; }
-#panel { background: #1c1c1e; border-radius: 16px; padding: 24px; width: 320px; max-height: 85vh; overflow-y: auto; color: #fff; }
-#panel h2 { text-align: center; font-size: 20px; font-weight: 600; margin-bottom: 20px; }
-.section-title { color: #888; font-size: 12px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; margin-top: 20px; margin-bottom: 8px; }
-.upload-btn { display: block; width: 100%; background: #5856d6; color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; text-align: center; margin-bottom: 4px; }
-.photo-count { color: #888; font-size: 13px; text-align: center; margin-bottom: 8px; }
-.option-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-radius: 10px; margin-bottom: 4px; cursor: pointer; color: #ccc; font-size: 16px; }
-.option-row.active { background: rgba(255,255,255,0.1); color: #fff; font-weight: 600; }
-.check { color: #4CD964; }
-.switch-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; }
-.switch-label { color: #fff; font-size: 16px; }
-.toggle { position: relative; width: 51px; height: 31px; }
-.toggle input { display: none; }
-.toggle-slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #3a3a3c; border-radius: 31px; cursor: pointer; transition: 0.3s; }
-.toggle-slider:before { content: ''; position: absolute; width: 27px; height: 27px; left: 2px; top: 2px; background: #fff; border-radius: 50%; transition: 0.3s; }
-.toggle input:checked + .toggle-slider { background: #4CD964; }
-.toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
-.done-btn { display: block; width: 100%; background: #2c2c2e; color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; }
-#welcome { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 30; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; text-align: center; padding: 40px; }
-#welcome h1 { font-size: 36px; font-weight: 300; margin-bottom: 12px; }
-#welcome p { color: #888; font-size: 16px; margin-bottom: 16px; line-height: 1.6; }
-#welcome .note { color: #5856d6; font-size: 14px; margin-bottom: 32px; }
-#welcome .start-btn { background: #5856d6; color: #fff; border: none; border-radius: 12px; padding: 16px 40px; font-size: 18px; font-weight: 600; cursor: pointer; }
-#loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 40; flex-direction: column; justify-content: center; align-items: center; color: #fff; }
-#loading.show { display: flex; }
-#loading p { font-size: 18px; margin-top: 16px; color: #888; }
-#loadingBar { width: 200px; height: 4px; background: #333; border-radius: 2px; margin-top: 12px; }
-#loadingFill { height: 100%; background: #5856d6; border-radius: 2px; width: 0%; transition: width 0.2s; }
-#fileInput, #fileInputSettings { display: none; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;overflow:hidden;font-family:-apple-system,sans-serif;width:100vw;height:100vh;}
+#wrap{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;}
+#imgA,#imgB{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
+#imgA{opacity:1;z-index:1;}
+#imgB{opacity:0;z-index:2;}
+#clock{position:fixed;bottom:20px;right:20px;text-align:right;z-index:999;}
+#timeEl{color:#fff;font-size:52px;font-weight:200;letter-spacing:2px;text-shadow:0 0 20px rgba(0,0,0,0.8),0 2px 4px rgba(0,0,0,0.8);}
+#dateEl{color:#fff;font-size:22px;font-weight:300;margin-top:2px;text-shadow:0 0 20px rgba(0,0,0,0.8),0 2px 4px rgba(0,0,0,0.8);}
+#welcome{position:fixed;top:0;left:0;width:100%;height:100%;background:#111;z-index:500;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;text-align:center;padding:30px;}
+#welcome h1{font-size:32px;font-weight:300;margin-bottom:10px;}
+#welcome p{color:#888;font-size:15px;margin-bottom:10px;line-height:1.5;}
+#welcome .note{color:#5856d6;font-size:13px;margin-bottom:28px;}
+.btn{background:#5856d6;color:#fff;border:none;border-radius:12px;padding:14px 36px;font-size:17px;font-weight:600;cursor:pointer;}
+#loading{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:600;display:none;flex-direction:column;justify-content:center;align-items:center;color:#fff;}
+#loading.show{display:flex;}
+#loadTxt{font-size:16px;color:#888;margin-top:12px;}
+#bar{width:180px;height:4px;background:#333;border-radius:2px;margin-top:10px;}
+#fill{height:100%;background:#5856d6;border-radius:2px;width:0;transition:width 0.2s;}
+#settings{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:400;justify-content:center;align-items:center;}
+#settings.show{display:flex;}
+#panel{background:#1c1c1e;border-radius:16px;padding:22px;width:300px;max-height:80vh;overflow-y:auto;color:#fff;}
+#panel h2{text-align:center;font-size:19px;font-weight:600;margin-bottom:18px;}
+.stitle{color:#888;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-top:18px;margin-bottom:6px;}
+.upbtn{display:block;width:100%;background:#5856d6;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:4px;}
+.pcount{color:#888;font-size:12px;text-align:center;margin-bottom:6px;}
+.row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-radius:10px;margin-bottom:3px;cursor:pointer;color:#ccc;font-size:15px;}
+.row.on{background:rgba(255,255,255,0.1);color:#fff;font-weight:600;}
+.ck{color:#4CD964;}
+.swrow{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;}
+.swlbl{color:#fff;font-size:15px;}
+.tog{position:relative;width:48px;height:28px;}
+.tog input{display:none;}
+.tslide{position:absolute;top:0;left:0;right:0;bottom:0;background:#3a3a3c;border-radius:28px;cursor:pointer;transition:0.3s;}
+.tslide:before{content:'';position:absolute;width:24px;height:24px;left:2px;top:2px;background:#fff;border-radius:50%;transition:0.3s;}
+.tog input:checked+.tslide{background:#4CD964;}
+.tog input:checked+.tslide:before{transform:translateX(20px);}
+.donebtn{display:block;width:100%;background:#2c2c2e;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;margin-top:18px;}
+#fi,#fi2{display:none;}
 </style>
 </head>
 <body>
@@ -54,259 +54,158 @@ body { background: #000; overflow: hidden; font-family: -apple-system, sans-seri
 <div id="welcome">
   <h1>🖼️ Pad Frame</h1>
   <p>Turn your old iPad into a beautiful digital photo frame.</p>
-  <p class="note">Tip: Select up to 30 photos for best performance</p>
-  <button class="start-btn" onclick="document.getElementById('fileInput').click()">Select Photos</button>
-  <input type="file" id="fileInput" accept="image/*" multiple onchange="loadPhotos(this)">
+  <p class="note">Select up to 20 photos for best performance</p>
+  <button class="btn" onclick="document.getElementById('fi').click()">Select Photos</button>
+  <input type="file" id="fi" accept="image/*" multiple onchange="load(this)">
 </div>
 
 <div id="loading">
-  <p id="loadingText">Loading photos...</p>
-  <div id="loadingBar"><div id="loadingFill"></div></div>
+  <div id="loadTxt">Loading...</div>
+  <div id="bar"><div id="fill"></div></div>
 </div>
 
-<div id="slideshow">
+<div id="wrap">
   <img id="imgA" src="" alt="">
   <img id="imgB" src="" alt="">
 </div>
 
 <div id="clock">
-  <div class="time" id="timeDisplay"></div>
-  <div class="date" id="dateDisplay"></div>
+  <div id="timeEl"></div>
+  <div id="dateEl"></div>
 </div>
 
-<div id="overlay">
+<div id="settings">
   <div id="panel">
     <h2>Settings</h2>
-    <div class="section-title">Photos</div>
-    <button class="upload-btn" onclick="document.getElementById('fileInputSettings').click()">Add / Change Photos</button>
-    <input type="file" id="fileInputSettings" accept="image/*" multiple onchange="loadPhotos(this)">
-    <div class="photo-count" id="photoCount">0 photos loaded</div>
-    <div class="section-title">Transition Effect</div>
-    <div id="effectList"></div>
-    <div class="section-title">Photo Duration</div>
-    <div id="intervalList"></div>
-    <div class="section-title">Display</div>
-    <div class="switch-row">
-      <span class="switch-label">Show Time & Date</span>
-      <label class="toggle">
-        <input type="checkbox" id="clockToggle" checked onchange="toggleClock()">
-        <span class="toggle-slider"></span>
+    <div class="stitle">Photos</div>
+    <button class="upbtn" onclick="document.getElementById('fi2').click()">Change Photos</button>
+    <input type="file" id="fi2" accept="image/*" multiple onchange="load(this)">
+    <div class="pcount" id="pc">0 photos</div>
+    <div class="stitle">Transition</div>
+    <div id="efx"></div>
+    <div class="stitle">Duration</div>
+    <div id="ivl"></div>
+    <div class="stitle">Display</div>
+    <div class="swrow">
+      <span class="swlbl">Show Clock</span>
+      <label class="tog">
+        <input type="checkbox" id="clkTog" checked onchange="document.getElementById('clock').style.display=this.checked?'block':'none'">
+        <span class="tslide"></span>
       </label>
     </div>
-    <button class="done-btn" onclick="closeSettings()">Done</button>
+    <button class="donebtn" onclick="document.getElementById('settings').classList.remove('show')">Done</button>
   </div>
 </div>
 
 <script>
-var MAX_PHOTOS = 20;
-var photos = [], currentIndex = 0, activeLayer = 'A';
-var slideTimer = null, effectIndex = 0, intervalValue = 5000, isTransitioning = false;
-var EFFECTS = ['fade','slideLeft','slideUp'];
-var EFFECT_LABELS = {fade:'Fade', slideLeft:'Slide Left', slideUp:'Slide Up'};
-var INTERVALS = [
-  {label:'3 sec', value:3000},
-  {label:'5 sec', value:5000},
-  {label:'10 sec', value:10000},
-  {label:'30 sec', value:30000},
-  {label:'1 min', value:60000}
-];
-var imgA = document.getElementById('imgA');
-var imgB = document.getElementById('imgB');
-var overlay = document.getElementById('overlay');
-var welcome = document.getElementById('welcome');
-var loading = document.getElementById('loading');
+var photos=[],idx=0,layer='A',timer=null,efxIdx=0,ivl=5000,busy=false;
+var EFX=['fade','slideLeft','slideUp'];
+var ELBL={fade:'Fade',slideLeft:'Slide Left',slideUp:'Slide Up'};
+var IVL=[{l:'3 sec',v:3000},{l:'5 sec',v:5000},{l:'10 sec',v:10000},{l:'30 sec',v:30000},{l:'1 min',v:60000}];
+var A=document.getElementById('imgA'),B=document.getElementById('imgB');
 
-function updateClock() {
-  var now = new Date();
-  var h = String(now.getHours()).padStart(2,'0');
-  var m = String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('timeDisplay').textContent = h + ':' + m;
-  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('dateDisplay').textContent =
-    days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ' ' + now.getFullYear();
+function tick(){
+  var n=new Date(),h=('0'+n.getHours()).slice(-2),m=('0'+n.getMinutes()).slice(-2);
+  document.getElementById('timeEl').textContent=h+':'+m;
+  var D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dateEl').textContent=D[n.getDay()]+', '+M[n.getMonth()]+' '+n.getDate()+' '+n.getFullYear();
 }
-setInterval(updateClock, 1000);
-updateClock();
+setInterval(tick,1000);tick();
 
-function toggleClock() {
-  var show = document.getElementById('clockToggle').checked;
-  document.getElementById('clock').style.display = show ? 'block' : 'none';
+function shuffle(a){var r=a.slice();for(var i=r.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=r[i];r[i]=r[j];r[j]=t;}return r;}
+
+function resize(src,cb){
+  var i=new Image();
+  i.onload=function(){
+    var s=Math.min(1024/i.width,768/i.height,1);
+    var c=document.createElement('canvas');
+    c.width=Math.round(i.width*s);c.height=Math.round(i.height*s);
+    c.getContext('2d').drawImage(i,0,0,c.width,c.height);
+    cb(c.toDataURL('image/jpeg',0.75));
+  };i.src=src;
 }
 
-function shuffleArray(arr) {
-  var a = arr.slice();
-  for (var i = a.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var t = a[i]; a[i] = a[j]; a[j] = t;
-  }
-  return a;
-}
-
-function resizeImage(dataUrl, maxW, maxH, callback) {
-  var img = new Image();
-  img.onload = function() {
-    var w = img.width, h = img.height;
-    var scale = Math.min(maxW/w, maxH/h, 1);
-    var canvas = document.createElement('canvas');
-    canvas.width = Math.round(w * scale);
-    canvas.height = Math.round(h * scale);
-    var ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    callback(canvas.toDataURL('image/jpeg', 0.7));
-  };
-  img.src = dataUrl;
-}
-
-function loadPhotos(input) {
-  var files = Array.from(input.files);
-  if (!files.length) return;
-
-  // 隨機選最多 MAX_PHOTOS 張
-  files = shuffleArray(files).slice(0, MAX_PHOTOS);
-
-  welcome.style.display = 'none';
-  loading.classList.add('show');
-  document.getElementById('loadingText').textContent = 'Loading ' + files.length + ' photos...';
-
-  photos = [];
-  var loaded = 0;
-
-  files.forEach(function(file) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      // 縮小圖片節省記憶體
-      resizeImage(e.target.result, 1024, 768, function(resized) {
-        photos.push(resized);
-        loaded++;
-        var pct = Math.round(loaded / files.length * 100);
-        document.getElementById('loadingFill').style.width = pct + '%';
-        document.getElementById('loadingText').textContent = 'Loading... ' + pct + '%';
-
-        if (loaded === files.length) {
-          loading.classList.remove('show');
-          overlay.classList.remove('show');
-          document.getElementById('photoCount').textContent = photos.length + ' photos loaded';
-          startSlideshow();
+function load(inp){
+  var files=shuffle(Array.from(inp.files)).slice(0,20);
+  if(!files.length)return;
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('settings').classList.remove('show');
+  var ld=document.getElementById('loading');
+  ld.classList.add('show');
+  photos=[];var done=0;
+  files.forEach(function(f){
+    var r=new FileReader();
+    r.onload=function(e){
+      resize(e.target.result,function(d){
+        photos.push(d);done++;
+        var p=Math.round(done/files.length*100);
+        document.getElementById('fill').style.width=p+'%';
+        document.getElementById('loadTxt').textContent='Loading '+p+'%';
+        if(done===files.length){
+          ld.classList.remove('show');
+          document.getElementById('pc').textContent=photos.length+' photos';
+          start();
         }
       });
-    };
-    reader.readAsDataURL(file);
+    };r.readAsDataURL(f);
   });
 }
 
-function startSlideshow() {
-  if (!photos.length) return;
-  imgA.src = photos[0];
-  imgA.style.opacity = 1;
-  imgA.style.transform = '';
-  imgB.style.opacity = 0;
-  imgB.style.transform = '';
-  imgA.style.zIndex = 1;
-  imgB.style.zIndex = 2;
-  activeLayer = 'A';
-  currentIndex = 0;
-  if (slideTimer) clearInterval(slideTimer);
-  slideTimer = setInterval(doTransition, intervalValue);
+function start(){
+  if(!photos.length)return;
+  A.src=photos[0];A.style.opacity=1;A.style.transform='';A.style.zIndex=1;
+  B.style.opacity=0;B.style.transform='';B.style.zIndex=2;
+  layer='A';idx=0;
+  if(timer)clearInterval(timer);
+  timer=setInterval(next,ivl);
 }
 
-function doTransition() {
-  if (photos.length < 2 || isTransitioning) return;
-  isTransitioning = true;
-  var nextIndex = (currentIndex + 1) % photos.length;
-  var effect = EFFECTS[effectIndex];
-  var w = window.innerWidth, h = window.innerHeight;
-
-  if (activeLayer === 'A') {
-    imgB.src = photos[nextIndex];
-    imgB.style.transform = '';
-    imgB.style.opacity = 0;
-    imgB.style.transition = 'none';
-    imgB.style.zIndex = 2;
-    imgA.style.zIndex = 1;
-    setTimeout(function() {
-      if (effect === 'fade') {
-        imgB.style.transition = 'opacity 1.8s ease';
-        imgA.style.transition = 'opacity 1.8s ease';
-        imgB.style.opacity = 1; imgA.style.opacity = 0;
-      } else if (effect === 'slideLeft') {
-        imgB.style.transform = 'translateX('+w+'px)'; imgB.style.opacity = 1;
-        imgB.style.transition = 'transform 1.5s ease';
-        imgA.style.transition = 'transform 1.5s ease';
-        setTimeout(function(){ imgB.style.transform='translateX(0)'; imgA.style.transform='translateX(-'+w+'px)'; }, 20);
-      } else if (effect === 'slideUp') {
-        imgB.style.transform = 'translateY('+h+'px)'; imgB.style.opacity = 1;
-        imgB.style.transition = 'transform 1.5s ease';
-        imgA.style.transition = 'transform 1.5s ease';
-        setTimeout(function(){ imgB.style.transform='translateY(0)'; imgA.style.transform='translateY(-'+h+'px)'; }, 20);
-      }
-      setTimeout(function() {
-        activeLayer = 'B'; currentIndex = nextIndex;
-        imgA.style.transition = 'none'; imgA.style.transform = ''; imgA.style.opacity = 0;
-        isTransitioning = false;
-      }, 2000);
-    }, 50);
-  } else {
-    imgA.src = photos[nextIndex];
-    imgA.style.transform = '';
-    imgA.style.opacity = 0;
-    imgA.style.transition = 'none';
-    imgA.style.zIndex = 2;
-    imgB.style.zIndex = 1;
-    setTimeout(function() {
-      if (effect === 'fade') {
-        imgA.style.transition = 'opacity 1.8s ease';
-        imgB.style.transition = 'opacity 1.8s ease';
-        imgA.style.opacity = 1; imgB.style.opacity = 0;
-      } else if (effect === 'slideLeft') {
-        imgA.style.transform = 'translateX('+w+'px)'; imgA.style.opacity = 1;
-        imgA.style.transition = 'transform 1.5s ease';
-        imgB.style.transition = 'transform 1.5s ease';
-        setTimeout(function(){ imgA.style.transform='translateX(0)'; imgB.style.transform='translateX(-'+w+'px)'; }, 20);
-      } else if (effect === 'slideUp') {
-        imgA.style.transform = 'translateY('+h+'px)'; imgA.style.opacity = 1;
-        imgA.style.transition = 'transform 1.5s ease';
-        imgB.style.transition = 'transform 1.5s ease';
-        setTimeout(function(){ imgA.style.transform='translateY(0)'; imgB.style.transform='translateY(-'+h+'px)'; }, 20);
-      }
-      setTimeout(function() {
-        activeLayer = 'A'; currentIndex = nextIndex;
-        imgB.style.transition = 'none'; imgB.style.transform = ''; imgB.style.opacity = 0;
-        isTransitioning = false;
-      }, 2000);
-    }, 50);
-  }
+function next(){
+  if(photos.length<2||busy)return;
+  busy=true;
+  var ni=(idx+1)%photos.length,ef=EFX[efxIdx],w=window.innerWidth,h=window.innerHeight;
+  var top=layer==='A'?B:A,bot=layer==='A'?A:B;
+  top.src=photos[ni];top.style.transform='';top.style.opacity=0;top.style.transition='none';top.style.zIndex=2;bot.style.zIndex=1;
+  setTimeout(function(){
+    if(ef==='fade'){
+      top.style.transition='opacity 1.8s';bot.style.transition='opacity 1.8s';
+      top.style.opacity=1;bot.style.opacity=0;
+    }else if(ef==='slideLeft'){
+      top.style.transform='translateX('+w+'px)';top.style.opacity=1;
+      top.style.transition='transform 1.5s ease';bot.style.transition='transform 1.5s ease';
+      setTimeout(function(){top.style.transform='translateX(0)';bot.style.transform='translateX(-'+w+'px)';},20);
+    }else{
+      top.style.transform='translateY('+h+'px)';top.style.opacity=1;
+      top.style.transition='transform 1.5s ease';bot.style.transition='transform 1.5s ease';
+      setTimeout(function(){top.style.transform='translateY(0)';bot.style.transform='translateY(-'+h+'px)';},20);
+    }
+    setTimeout(function(){
+      layer=layer==='A'?'B':'A';idx=ni;
+      bot.style.transition='none';bot.style.transform='';bot.style.opacity=0;
+      busy=false;
+    },2100);
+  },50);
 }
 
-function openSettings() { overlay.classList.add('show'); renderSettings(); }
-function closeSettings() { overlay.classList.remove('show'); }
-document.getElementById('slideshow').addEventListener('click', openSettings);
+document.getElementById('wrap').addEventListener('click',function(){
+  if(photos.length)document.getElementById('settings').classList.add('show');
+  renderSettings();
+});
 
-function renderSettings() {
-  var effectList = document.getElementById('effectList');
-  effectList.innerHTML = '';
-  EFFECTS.forEach(function(e, i) {
-    var div = document.createElement('div');
-    div.className = 'option-row' + (i === effectIndex ? ' active' : '');
-    div.innerHTML = EFFECT_LABELS[e] + (i === effectIndex ? '<span class="check">✓</span>' : '');
-    div.onclick = function() { effectIndex = i; renderSettings(); };
-    effectList.appendChild(div);
+function renderSettings(){
+  var e=document.getElementById('efx');e.innerHTML='';
+  EFX.forEach(function(x,i){
+    var d=document.createElement('div');d.className='row'+(i===efxIdx?' on':'');
+    d.innerHTML=ELBL[x]+(i===efxIdx?'<span class="ck">✓</span>':'');
+    d.onclick=function(){efxIdx=i;renderSettings();};e.appendChild(d);
   });
-  var intervalList = document.getElementById('intervalList');
-  intervalList.innerHTML = '';
-  INTERVALS.forEach(function(item) {
-    var div = document.createElement('div');
-    div.className = 'option-row' + (item.value === intervalValue ? ' active' : '');
-    div.innerHTML = item.label + (item.value === intervalValue ? '<span class="check">✓</span>' : '');
-    div.onclick = function() {
-      intervalValue = item.value;
-      if (slideTimer) clearInterval(slideTimer);
-      slideTimer = setInterval(doTransition, intervalValue);
-      renderSettings();
-    };
-    intervalList.appendChild(div);
+  var iv=document.getElementById('ivl');iv.innerHTML='';
+  IVL.forEach(function(it){
+    var d=document.createElement('div');d.className='row'+(it.v===ivl?' on':'');
+    d.innerHTML=it.l+(it.v===ivl?'<span class="ck">✓</span>':'');
+    d.onclick=function(){ivl=it.v;if(timer)clearInterval(timer);timer=setInterval(next,ivl);renderSettings();};
+    iv.appendChild(d);
   });
-  document.getElementById('photoCount').textContent = photos.length + ' photos loaded';
 }
 </script>
 </body>
