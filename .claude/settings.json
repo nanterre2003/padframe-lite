@@ -1,0 +1,46 @@
+{
+  "customInstructions": "Use concurrent execution for all operations. Follow SPARC methodology for complex tasks. Use ruflo MCP tools for agent coordination and memory management.",
+  "permissions": {
+    "allow": [
+      "Bash(npx ruflo*)",
+      "Bash(npx @claude-flow*)",
+      "Bash(npx claude-flow*)",
+      "Bash(npm run:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(node:*)",
+      "Bash(ls:*)",
+      "Bash(npx:*)",
+      "mcp__claude-flow__*"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Bash(rm -rf /)"
+    ]
+  },
+  "skills": {
+    "source": ".claude/commands",
+    "enabled": true
+  },
+  "mcpServers": {
+    "claude-flow": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "ruflo@latest",
+        "mcp",
+        "start"
+      ]
+    }
+  },
+  "enabledMcpjsonServers": [
+    "claude-flow"
+  ]
+}
