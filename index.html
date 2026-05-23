@@ -9,14 +9,15 @@
 <title>Pad Frame</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#000;overflow:hidden;font-family:-apple-system,sans-serif;width:100vw;height:100vh;}
+html,body{width:100%;height:100%;}
+body{background:#000;overflow:hidden;font-family:-apple-system,sans-serif;margin:0;padding:0;}
 #wrap{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;}
-#imgA,#imgB{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
+#imgA,#imgB{position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center;background-repeat:no-repeat;}
 #imgA{opacity:1;z-index:1;}
 #imgB{opacity:0;z-index:2;}
-#clock{position:fixed;bottom:20px;right:20px;text-align:right;z-index:999;}
-#timeEl{color:#fff;font-size:72px;font-weight:200;letter-spacing:2px;text-shadow:0 0 20px rgba(0,0,0,0.8),0 2px 4px rgba(0,0,0,0.8);}
-#dateEl{color:#fff;font-size:28px;font-weight:300;margin-top:2px;text-shadow:0 0 20px rgba(0,0,0,0.8),0 2px 4px rgba(0,0,0,0.8);}
+#clock{position:fixed;bottom:30px;right:30px;text-align:right;z-index:999;}
+#timeEl{color:#fff;font-size:110px;font-weight:200;letter-spacing:2px;text-shadow:0 0 20px rgba(0,0,0,0.8),0 2px 4px rgba(0,0,0,0.8);}
+#dateEl{color:#fff;font-size:36px;font-weight:300;margin-top:2px;text-shadow:0 0 20px rgba(0,0,0,0.8),0 2px 4px rgba(0,0,0,0.8);}
 #welcome{position:fixed;top:0;left:0;width:100%;height:100%;background:#111;z-index:500;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;text-align:center;padding:30px;}
 #welcome h1{font-size:32px;font-weight:300;margin-bottom:10px;}
 #welcome p{color:#888;font-size:15px;margin-bottom:10px;line-height:1.5;}
@@ -54,7 +55,8 @@ body{background:#000;overflow:hidden;font-family:-apple-system,sans-serif;width:
 <div id="welcome">
   <h1>🖼️ Pad Frame</h1>
   <p>Turn your old iPad into a beautiful digital photo frame.</p>
-  <p class="note">Select up to 20 photos for best performance</p>
+  <p class="note" style="margin-bottom:10px;">Select up to 20 photos for best performance</p>
+  <p class="note" style="color:#aaa;">Tip: Set iPad Auto-Lock to "Never" in Settings</p>
   <button class="btn" onclick="document.getElementById('fi').click()">Select Photos</button>
   <input type="file" id="fi" accept="image/*" multiple onchange="load(this)">
 </div>
@@ -65,8 +67,8 @@ body{background:#000;overflow:hidden;font-family:-apple-system,sans-serif;width:
 </div>
 
 <div id="wrap">
-  <img id="imgA" src="" alt="">
-  <img id="imgB" src="" alt="">
+  <div id="imgA"></div>
+  <div id="imgB"></div>
 </div>
 
 <div id="clock">
@@ -126,7 +128,9 @@ function resize(src,cb){
 }
 
 function load(inp){
-  var files=shuffle(Array.from(inp.files)).slice(0,20);
+  var fileArray=[];
+  for(var i=0; i<inp.files.length; i++) fileArray.push(inp.files[i]);
+  var files=shuffle(fileArray).slice(0,20);
   if(!files.length)return;
   document.getElementById('welcome').style.display='none';
   document.getElementById('settings').classList.remove('show');
@@ -153,7 +157,7 @@ function load(inp){
 
 function start(){
   if(!photos.length)return;
-  A.src=photos[0];A.style.opacity=1;A.style.transform='';A.style.zIndex=1;
+  A.style.backgroundImage='url('+photos[0]+')';A.style.opacity=1;A.style.transform='';A.style.zIndex=1;
   B.style.opacity=0;B.style.transform='';B.style.zIndex=2;
   layer='A';idx=0;
   if(timer)clearInterval(timer);
@@ -165,7 +169,7 @@ function next(){
   busy=true;
   var ni=(idx+1)%photos.length,ef=EFX[efxIdx],w=window.innerWidth,h=window.innerHeight;
   var top=layer==='A'?B:A,bot=layer==='A'?A:B;
-  top.src=photos[ni];top.style.transform='';top.style.opacity=0;top.style.transition='none';top.style.zIndex=2;bot.style.zIndex=1;
+  top.style.backgroundImage='url('+photos[ni]+')';top.style.transform='';top.style.opacity=0;top.style.transition='none';top.style.zIndex=2;bot.style.zIndex=1;
   setTimeout(function(){
     if(ef==='fade'){
       top.style.transition='opacity 1.8s';bot.style.transition='opacity 1.8s';
