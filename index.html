@@ -130,18 +130,21 @@ function fetchWeather(){
       try{
         var geo=JSON.parse(xhr.responseText);
         var w=new XMLHttpRequest();
-        w.open('GET','https://api.open-meteo.com/v1/forecast?latitude='+geo.latitude+'&longitude='+geo.longitude+'&current_weather=true');
+        w.open('GET','https://api.met.no/weatherapi/locationforecast/2.0/compact?lat='+geo.latitude+'&lon='+geo.longitude);
         w.onload=function(){
           if(w.status===200){
             var d=JSON.parse(w.responseText);
-            var temp=Math.round(d.current_weather.temperature)+'°';
-            var c=d.current_weather.weathercode, icon='🌤️';
-            if(c===0)icon='☀️';
-            else if(c<=3)icon='🌤️';
-            else if(c===45||c===48)icon='🌫️';
-            else if((c>=51&&c<=67)||(c>=80&&c<=82))icon='🌧️';
-            else if((c>=71&&c<=77)||c===85||c===86)icon='❄️';
-            else if(c>=95)icon='⛈️';
+            var t=d.properties.timeseries[0];
+            var temp=Math.round(t.data.instant.details.air_temperature)+'°';
+            var n=t.data.next_1_hours||t.data.next_6_hours;
+            var sym=(n&&n.summary)?n.summary.symbol_code:'cloudy';
+            var icon='🌤️';
+            if(sym.indexOf('rain')>-1||sym.indexOf('shower')>-1)icon='🌧️';
+            else if(sym.indexOf('snow')>-1||sym.indexOf('sleet')>-1)icon='❄️';
+            else if(sym.indexOf('thunder')>-1)icon='⛈️';
+            else if(sym.indexOf('fog')>-1)icon='🌫️';
+            else if(sym.indexOf('cloud')>-1)icon='🌤️';
+            else if(sym.indexOf('fair')>-1||sym.indexOf('clear')>-1)icon='☀️';
             document.getElementById('wIcon').textContent=icon;
             document.getElementById('wTemp').textContent=temp;
           }
