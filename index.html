@@ -123,51 +123,37 @@ function tick(){
 setInterval(tick,1000);tick();
 
 function fetchWeather(){
-  var xhr=new XMLHttpRequest();
-  xhr.open('GET','https://ipinfo.io/json');
-  xhr.onload=function(){
-    if(xhr.status===200){
+  var w=new XMLHttpRequest();
+  w.open('GET','https://wttr.in/?format=j1');
+  w.onload=function(){
+    if(w.status===200){
       try{
-        var geo=JSON.parse(xhr.responseText);
-        var coords=geo.loc.split(',');
-        var w=new XMLHttpRequest();
-        w.open('GET','https://api.open-meteo.com/v1/forecast?latitude='+coords[0]+'&longitude='+coords[1]+'&current_weather=true');
-        w.onload=function(){
-          if(w.status===200){
-            var d=JSON.parse(w.responseText);
-            var temp=Math.round(d.current_weather.temperature)+'°';
-            var c=d.current_weather.weathercode, icon='🌤️';
-            if(c===0)icon='☀️';
-            else if(c<=3)icon='🌤️';
-            else if(c===45||c===48)icon='🌫️';
-            else if((c>=51&&c<=67)||(c>=80&&c<=82))icon='🌧️';
-            else if((c>=71&&c<=77)||c===85||c===86)icon='❄️';
-            else if(c>=95)icon='⛈️';
-            document.getElementById('wIcon').textContent=icon;
-            document.getElementById('wTemp').textContent=temp;
-          }else{
-            document.getElementById('wIcon').textContent='E2';
-            document.getElementById('wTemp').textContent=w.status;
-          }
-        };
-        w.onerror=function(){
-          document.getElementById('wIcon').textContent='E2';
-          document.getElementById('wTemp').textContent='net';
-        };
-        w.send();
+        var d=JSON.parse(w.responseText);
+        var temp=d.current_condition[0].temp_C+'°';
+        var desc=d.current_condition[0].weatherDesc[0].value.toLowerCase();
+        var icon='🌤️';
+        if(desc.indexOf('rain')>-1||desc.indexOf('drizzle')>-1||desc.indexOf('shower')>-1)icon='🌧️';
+        else if(desc.indexOf('snow')>-1||desc.indexOf('ice')>-1||desc.indexOf('blizzard')>-1)icon='❄️';
+        else if(desc.indexOf('thunder')>-1)icon='⛈️';
+        else if(desc.indexOf('fog')>-1||desc.indexOf('mist')>-1)icon='🌫️';
+        else if(desc.indexOf('cloud')>-1||desc.indexOf('overcast')>-1)icon='☁️';
+        else if(desc.indexOf('sun')>-1||desc.indexOf('clear')>-1)icon='☀️';
+        document.getElementById('wIcon').textContent=icon;
+        document.getElementById('wTemp').textContent=temp;
       }catch(e){
         document.getElementById('wIcon').textContent='E3';
+        document.getElementById('wTemp').textContent='parse';
       }
     }else{
-      document.getElementById('wIcon').textContent='E1';
-      document.getElementById('wTemp').textContent=xhr.status;
+      document.getElementById('wIcon').textContent='E2';
+      document.getElementById('wTemp').textContent=w.status;
     }
   };
-  xhr.onerror=function(){
+  w.onerror=function(){
     document.getElementById('wIcon').textContent='E1';
     document.getElementById('wTemp').textContent='net';
   };
-  xhr.send();
+  w.send();
 }
 fetchWeather();
 setInterval(fetchWeather,1800000);
