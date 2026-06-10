@@ -133,14 +133,15 @@ function fetchWeatherOpenMeteo(lat, lon) {
         var temp=Math.round(d.current_weather.temperature)+'°';
         var svgSun = '<svg viewBox="0 0 100 100" fill="none" stroke="#FFD700" stroke-width="8" stroke-linecap="round" style="width:100px;height:100px;"><circle cx="50" cy="50" r="22" fill="#FFD700"></circle><line x1="50" y1="25" x2="50" y2="8"></line><line x1="50" y1="75" x2="50" y2="92"></line><line x1="25" y1="50" x2="8" y2="50"></line><line x1="75" y1="50" x2="92" y2="50"></line><line x1="32" y1="32" x2="18" y2="18"></line><line x1="68" y1="68" x2="82" y2="82"></line><line x1="32" y1="68" x2="18" y2="82"></line><line x1="68" y1="32" x2="82" y2="18"></line></svg>';
         var svgCloud = '<svg viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100px;height:100px;"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>';
+        var svgPartlyCloudy = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100px;height:100px;"><g stroke="#FFD700" fill="#FFD700"><circle cx="8" cy="8" r="3"></circle><line x1="8" y1="4" x2="8" y2="1"></line><line x1="8" y1="12" x2="8" y2="15"></line><line x1="4" y1="8" x2="1" y2="8"></line><line x1="12" y1="8" x2="15" y2="8"></line><line x1="5.1" y1="5.1" x2="3" y2="3"></line><line x1="10.9" y1="10.9" x2="13" y2="13"></line><line x1="5.1" y1="10.9" x2="3" y2="13"></line><line x1="10.9" y1="5.1" x2="13" y2="3"></line></g><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" stroke="#FFF" fill="#FFF"></path></svg>';
         var svgRain = '<svg viewBox="0 0 24 24" fill="none" stroke="#ADD8E6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100px;height:100px;"><line x1="16" y1="13" x2="16" y2="21"></line><line x1="8" y1="13" x2="8" y2="21"></line><line x1="12" y1="15" x2="12" y2="23"></line><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path></svg>';
         var svgSnow = '<svg viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100px;height:100px;"><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line><line x1="4.93" y1="19.07" x2="19.07" y2="4.93"></line></svg>';
         var svgThunder = '<svg viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100px;height:100px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>';
         
         var c=d.current_weather.weathercode, icon=svgCloud;
         if(c===0)icon=svgSun;
-        else if(c<=3)icon=svgCloud;
-        else if(c===45||c===48)icon=svgCloud;
+        else if(c===1||c===2)icon=svgPartlyCloudy;
+        else if(c===3||c===45||c===48)icon=svgCloud;
         else if((c>=51&&c<=67)||(c>=80&&c<=82))icon=svgRain;
         else if((c>=71&&c<=77)||c===85||c===86)icon=svgSnow;
         else if(c>=95)icon=svgThunder;
