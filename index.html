@@ -122,22 +122,24 @@ function tick(){
 }
 setInterval(tick,1000);tick();
 
-function fetchWeather(){
+function fetchWeatherMetNo(lat, lon) {
   var w=new XMLHttpRequest();
-  w.open('GET','https://wttr.in/?format=j1');
+  w.open('GET','https://api.met.no/weatherapi/locationforecast/2.0/compact?lat='+lat+'&lon='+lon);
   w.onload=function(){
     if(w.status===200){
       try{
         var d=JSON.parse(w.responseText);
-        var temp=d.current_condition[0].temp_C+'°';
-        var desc=d.current_condition[0].weatherDesc[0].value.toLowerCase();
+        var t=d.properties.timeseries[0];
+        var temp=Math.round(t.data.instant.details.air_temperature)+'°';
+        var n=t.data.next_1_hours||t.data.next_6_hours;
+        var sym=(n&&n.summary)?n.summary.symbol_code:'cloudy';
         var icon='🌤️';
-        if(desc.indexOf('rain')>-1||desc.indexOf('drizzle')>-1||desc.indexOf('shower')>-1)icon='🌧️';
-        else if(desc.indexOf('snow')>-1||desc.indexOf('ice')>-1||desc.indexOf('blizzard')>-1)icon='❄️';
-        else if(desc.indexOf('thunder')>-1)icon='⛈️';
-        else if(desc.indexOf('fog')>-1||desc.indexOf('mist')>-1)icon='🌫️';
-        else if(desc.indexOf('cloud')>-1||desc.indexOf('overcast')>-1)icon='☁️';
-        else if(desc.indexOf('sun')>-1||desc.indexOf('clear')>-1)icon='☀️';
+        if(sym.indexOf('rain')>-1||sym.indexOf('shower')>-1)icon='🌧️';
+        else if(sym.indexOf('snow')>-1||sym.indexOf('sleet')>-1)icon='❄️';
+        else if(sym.indexOf('thunder')>-1)icon='⛈️';
+        else if(sym.indexOf('fog')>-1)icon='🌫️';
+        else if(sym.indexOf('cloud')>-1)icon='🌤️';
+        else if(sym.indexOf('fair')>-1||sym.indexOf('clear')>-1)icon='☀️';
         document.getElementById('wIcon').textContent=icon;
         document.getElementById('wTemp').textContent=temp;
       }catch(e){
@@ -150,10 +152,22 @@ function fetchWeather(){
     }
   };
   w.onerror=function(){
-    document.getElementById('wIcon').textContent='E1';
+    document.getElementById('wIcon').textContent='E2';
     document.getElementById('wTemp').textContent='net';
   };
   w.send();
+}
+
+function fetchWeather(){
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      fetchWeatherMetNo(pos.coords.latitude, pos.coords.longitude);
+    }, function() {
+      fetchWeatherMetNo(25.0478, 121.5319);
+    }, { timeout: 5000 });
+  } else {
+    fetchWeatherMetNo(25.0478, 121.5319);
+  }
 }
 fetchWeather();
 setInterval(fetchWeather,1800000);
