@@ -1,0 +1,74 @@
+{
+  "_comment": "Blank template — fill in with your own voice profile data via SETUP.md interview.",
+  "_instructions": "Run SETUP.md questionnaire to populate these profiles with your channel's actual voice data.",
+  "vlog": {
+    "tone_persona": "YOUR_PERSONA_HERE",
+    "opening_pattern": {
+      "template": "YOUR_OPENING_TEMPLATE",
+      "example_from_sample": "",
+      "structure": "hook → context → preview"
+    },
+    "punctuation": {
+      "soft_tail": ["⋯", "～"],
+      "exclaim_intensity": "low",
+      "particles": [],
+      "sentence_end": "natural"
+    },
+    "pronouns": ["I", "we"],
+    "wandering_verbs": [],
+    "hedged_evaluations": [],
+    "evaluation_template": "YOUR_EVALUATION_TEMPLATE",
+    "evaluation_examples": [],
+    "sign_off": {
+      "uses_boilerplate": false,
+      "reason": "fill in after SETUP.md interview",
+      "alternatives": []
+    },
+    "avoid_strict": [],
+    "on_screen_text_rules": {
+      "max_chars_per_line": 12,
+      "no_punctuation_in_captions": true,
+      "font_preference": "Noto Sans TC Bold"
+    },
+    "example_overlays_template": []
+  },
+  "high-demo": {
+    "tone_persona": "YOUR_DEMO_PERSONA",
+    "opening_pattern": {
+      "template": "YOUR_DEMO_OPENING",
+      "structure": "problem → solution → demo"
+    },
+    "sign_off": {
+      "uses_boilerplate": false,
+      "alternatives": []
+    },
+    "avoid_strict": [],
+    "on_screen_text_rules": {}
+  },
+  "high-reflective": {
+    "tone_persona": "YOUR_REFLECTIVE_PERSONA",
+    "opening_pattern": {
+      "template": "YOUR_REFLECTIVE_OPENING",
+      "structure": "observation → insight → invitation"
+    },
+    "sign_off": {
+      "uses_boilerplate": false,
+      "alternatives": []
+    },
+    "avoid_strict": [],
+    "on_screen_text_rules": {}
+  },
+  "low-diy": {
+    "tone_persona": "YOUR_DIY_PERSONA",
+    "opening_pattern": {
+      "template": "YOUR_DIY_OPENING",
+      "structure": "result first → steps → call to action"
+    },
+    "sign_off": {
+      "uses_boilerplate": false,
+      "alternatives": []
+    },
+    "avoid_strict": [],
+    "on_screen_text_rules": {}
+  }
+}
