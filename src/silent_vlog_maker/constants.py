@@ -36,43 +36,47 @@ TONEMAP_FILTER = (
 
 ENCODE_ARGS_BY_PLATFORM = {
     "yt_shorts": [
-        "-c:v", "h264_nvenc", "-preset", "p5", "-rc", "vbr",
-        "-b:v", "8M", "-maxrate", "12M", "-bufsize", "16M",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "18",
         "-profile:v", "high", "-pix_fmt", "yuv420p",
         "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
         "-c:a", "aac", "-b:a", "320k", "-ar", "48000",
         "-movflags", "+faststart",
     ],
     "yt_longform": [
-        "-c:v", "h264_nvenc", "-preset", "p5", "-rc", "vbr",
-        "-b:v", "12M", "-maxrate", "16M", "-bufsize", "24M",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "16",
         "-profile:v", "high", "-pix_fmt", "yuv420p",
         "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
         "-c:a", "aac", "-b:a", "320k", "-ar", "48000",
         "-movflags", "+faststart",
     ],
     "ig_reels": [
-        "-c:v", "h264_nvenc", "-preset", "p5", "-rc", "vbr",
-        "-b:v", "6M", "-maxrate", "9M", "-bufsize", "12M",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "20",
         "-profile:v", "high", "-pix_fmt", "yuv420p",
         "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
         "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
         "-movflags", "+faststart",
     ],
     "tiktok": [
-        "-c:v", "h264_nvenc", "-preset", "p5", "-rc", "vbr",
-        "-b:v", "6M", "-maxrate", "8M", "-bufsize", "12M",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "20",
         "-profile:v", "high", "-pix_fmt", "yuv420p",
         "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
         "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
         "-movflags", "+faststart",
     ],
     "threads": [
-        "-c:v", "h264_nvenc", "-preset", "p5", "-rc", "vbr",
-        "-b:v", "5M", "-maxrate", "7M", "-bufsize", "10M",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "22",
         "-profile:v", "high", "-pix_fmt", "yuv420p",
         "-color_primaries", "bt709", "-color_trc", "bt709",
         "-c:a", "aac", "-b:a", "128k", "-ar", "44100",
+        "-movflags", "+faststart",
+    ],
+    # GPU variants — use when h264_nvenc is available
+    "yt_shorts_nvenc": [
+        "-c:v", "h264_nvenc", "-preset", "p5", "-rc", "vbr",
+        "-b:v", "8M", "-maxrate", "12M", "-bufsize", "16M",
+        "-profile:v", "high", "-pix_fmt", "yuv420p",
+        "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
+        "-c:a", "aac", "-b:a", "320k", "-ar", "48000",
         "-movflags", "+faststart",
     ],
 }

@@ -59,8 +59,8 @@ def main():
     # --- normalize each to upright 1080x1920 (handles rotation flags too) ---
     norm1 = os.path.join(work, "norm1.mp4")
     norm2 = os.path.join(work, "norm2.mp4")
-    normalize_to_portrait(raw1, norm1)
-    normalize_to_portrait(raw2, norm2)
+    normalize_to_portrait(raw1, norm1, apply_tonemap=False)
+    normalize_to_portrait(raw2, norm2, apply_tonemap=False)
     print("[3/5] normalized to 9:16 portrait")
 
     # --- synthesize a music track LONGER than the video (so it never loops) ---

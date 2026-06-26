@@ -310,7 +310,7 @@ def build_one_short(
         filter_parts.append(f"[{i}:v]trim={start}:{start + dur},setpts=PTS-STARTPTS[v{i}]")
 
     concat_in = "".join(f"[v{i}]" for i in range(len(segs)))
-    filter_parts.append(f"{concat_in}concat=n={len(segs)}:v=1:a=0[outv]")
+    filter_parts.append(f"{concat_in}concat=n={len(segs)}:v=1:a=0[concatv]")
 
     # BGM audio chain with fade + volume
     total_dur = sum(dur for _, _, dur in segs)
@@ -328,11 +328,13 @@ def build_one_short(
     )
     filter_parts.append(audio_chain)
 
-    filter_complex = ";".join(filter_parts)
-
-    # Build ASS subtitles
+    # Build ASS subtitles and include the filter inside filter_complex
     ass_path = work / "captions.ass"
     build_multicolor_ass(caps, ass_path, font_name=font_name)
+    ass_escaped = str(ass_path).replace(chr(92), "/").replace(":", "\\:")
+    filter_parts.append(f"[concatv]ass='{ass_escaped}'[outv]")
+
+    filter_complex = ";".join(filter_parts)
 
     encode_args = list(ENCODE_ARGS_BY_PLATFORM.get(platform, ENCODE_ARGS_BY_PLATFORM["yt_shorts"]))
 
@@ -341,7 +343,6 @@ def build_one_short(
         *inputs,
         "-filter_complex", filter_complex,
         "-map", "[outv]", "-map", "[bgma]",
-        "-vf", f"ass={str(ass_path).replace(chr(92), '/').replace(':', '\\:')}",
         *encode_args,
         str(out),
     ]
