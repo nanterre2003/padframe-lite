@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>爬坡小车</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;background:#87ceeb;font-family:-apple-system,"PingFang SC",sans-serif;touch-action:none;}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;}
+#hud{position:fixed;top:0;left:0;right:0;display:none;padding:12px 16px;color:#fff;font-weight:700;text-shadow:0 2px 4px rgba(0,0,0,.5);pointer-events:none;}
+#hud .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+#dist{font-size:34px;}
+#coins{font-size:22px;}
+#fuelWrap{width:min(220px,40vw);height:16px;background:rgba(0,0,0,.4);border-radius:8px;overflow:hidden;margin-top:6px;border:2px solid #fff;}
+#fuel{height:100%;width:100%;background:#4cd964;transition:background .3s;}
+.pedal{position:fixed;bottom:18px;width:min(30vw,150px);height:min(30vw,150px);max-height:30vh;max-width:30vh;border-radius:24px;background:rgba(0,0,0,.28);border:3px solid rgba(255,255,255,.7);color:#fff;font-size:20px;font-weight:700;display:none;align-items:center;justify-content:center;touch-action:none;}
+.pedal.down{background:rgba(255,255,255,.35);}
+#brake{left:18px;}
+#gas{right:18px;}
+.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:10;padding:16px;}
+.overlay.show{display:flex;}
+.card{background:#1c1c1e;color:#fff;border-radius:20px;padding:22px;width:min(340px,100%);text-align:center;max-height:92vh;overflow-y:auto;touch-action:pan-y;}
+.card h1{font-size:26px;margin-bottom:4px;}
+.card .sub{color:#8e8e93;font-size:13px;margin-bottom:14px;}
+.stat{display:flex;justify-content:space-between;padding:6px 4px;color:#ccc;font-size:15px;}
+.stat b{color:#fff;}
+.up{display:flex;justify-content:space-between;align-items:center;background:#2c2c2e;border-radius:12px;padding:10px 12px;margin-top:8px;text-align:left;}
+.up small{color:#8e8e93;display:block;font-size:12px;}
+.btn{border:none;border-radius:12px;padding:12px 22px;font-size:16px;font-weight:700;color:#fff;background:#5856d6;cursor:pointer;}
+.btn.sm{padding:8px 14px;font-size:14px;background:#34c759;}
+.btn:disabled{background:#48484a;color:#8e8e93;}
+.btn.big{width:100%;margin-top:14px;padding:15px;font-size:18px;}
+.btn.alt{background:#3a3a3c;}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hud">
+  <div class="row">
+    <div><div id="dist">0 m</div><div id="fuelWrap"><div id="fuel"></div></div></div>
+    <div id="coins">🪙 0</div>
+  </div>
+</div>
+<div class="pedal" id="brake">煞车</div>
+<div class="pedal" id="gas">油门</div>
+
+<div class="overlay show" id="garage">
+  <div class="card">
+    <h1>🚙 爬坡小车</h1>
+    <div class="sub">右边油门，左边煞车。空中按油门/煞车可调整车身。</div>
+    <div class="stat"><span>金币</span><b id="gCoins">0</b></div>
+    <div class="stat"><span>最远纪录</span><b id="gBest">0 m</b></div>
+    <div class="up"><div>引擎 <b id="lvE"></b><small>更强的动力，爬更陡的坡</small></div><button class="btn sm" id="upE"></button></div>
+    <div class="up"><div>油箱 <b id="lvT"></b><small>更多燃料，跑得更远</small></div><button class="btn sm" id="upT"></button></div>
+    <div class="up"><div>轮胎 <b id="lvG"></b><small>更好的抓地力</small></div><button class="btn sm" id="upG"></button></div>
+    <button class="btn big" id="playBtn">出发！</button>
+  </div>
+</div>
+
+<div class="overlay" id="over">
+  <div class="card">
+    <h1 id="overTitle">翻车了！</h1>
+    <div class="sub" id="overSub"></div>
+    <div class="stat"><span>本局距离</span><b id="oDist"></b></div>
+    <div class="stat"><span>本局金币</span><b id="oCoins"></b></div>
+    <div class="stat"><span>最远纪录</span><b id="oBest"></b></div>
+    <button class="btn big" id="retryBtn">再来一局</button>
+    <button class="btn big alt" id="garageBtn">车库升级</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ---------- 存档 ----------
+var save={coins:0,best:0,eng:0,tank:0,grip:0};
+try{var s=JSON.parse(localStorage.getItem('hc_save')||'null');if(s)for(var k in save)if(typeof s[k]==='number')save[k]=s[k];}catch(e){}
+function persist(){try{localStorage.setItem('hc_save',JSON.stringify(save));}catch(e){}}
+
+// ---------- 常量 ----------
+var G=900, WX=34, WY=14, R=14, I=1500, K=56, C=11;
+var START_X=120, MAX_LV=8;
+
+// ---------- 地形 ----------
+function amp(x){var t=Math.min(Math.max((x-250)/600,0),1);t=t*t*(3-2*t);return t*(40+Math.min(x/90,70));}
+function ground(x){
+  return 420+amp(x)*(Math.sin(x/180)*.6+Math.sin(x/70+1)*.3+Math.sin(x/410)*1)+x*0.012*Math.sin(x/2300);
+}
+function slope(x){return (ground(x+1)-ground(x-1))/2;}
+
+// ---------- 状态 ----------
+var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+var W=0,H=0,DPR=1;
+function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;cv.width=W*DPR;cv.height=H*DPR;}
+window.addEventListener('resize',resize);resize();
+
+var state='garage', car, items, nextItemX, rng, camX=0, camY=0, runCoins=0, stuckT=0, fuel=100, maxFuel=100;
+var keys={gas:false,brake:false};
+var parts=[];
+
+function engPower(){return 1+save.eng*0.16;}
+function tankSize(){return 100+save.tank*25;}
+function mu(){return 1.0+save.grip*0.12;}
+
+function seeded(seed){var a=seed;return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function newRun(){
+  rng=seeded((Date.now()&0xffff)+7);
+  var gy=ground(START_X);
+  car={x:START_X,y:gy-WY-R+8,vx:0,vy:0,ang:0,w:0,spin:0,onGround:0,airT:0,flips:0,lastAng:0};
+  items=[];nextItemX=500;runCoins=0;stuckT=0;parts=[];
+  maxFuel=tankSize();fuel=maxFuel;
+  camX=car.x;camY=car.y;
+  spawnItems(2600);
+}
+function spawnItems(upTo){
+  while(nextItemX<upTo){
+    var x=nextItemX;
+    if(rng()<0.16){items.push({t:'fuel',x:x,y:ground(x)-36,got:false});nextItemX+=380+rng()*200;}
+    else{
+      var n=3+Math.floor(rng()*4);
+      for(var i=0;i<n;i++){var cx=x+i*46;items.push({t:'coin',x:cx,y:ground(cx)-34,got:false});}
+      nextItemX+=n*46+160+rng()*220;
+    }
+  }
+}
+
+// ---------- 物理 ----------
+function crash(why){
+  if(state!=='play')return;
+  state='over';
+  for(var i=0;i<22;i++)parts.push({x:car.x,y:car.y-10,vx:(Math.random()-.5)*300,vy:-Math.random()*300,l:1});
+  finish(why);
+}
+function finish(why){
+  var d=Math.max(0,Math.floor((car.x-START_X)/10));
+  save.coins+=runCoins;
+  var newBest=d>save.best;if(newBest)save.best=d;
+  persist();
+  document.getElementById('overTitle').textContent=why==='fuel'?'没油了！':'翻车了！';
+  document.getElementById('overSub').textContent=newBest?'🎉 新纪录！':'再试一次，你能更远。';
+  document.getElementById('oDist').textContent=d+' m';
+  document.getElementById('oCoins').textContent='+'+runCoins;
+  document.getElementById('oBest').textContent=save.best+' m';
+  setTimeout(function(){document.getElementById('over').classList.add('show');setHud(false);},why==='fuel'?200:900);
+}
+
+function step(dt){
+  var c=Math.cos(car.ang),sn=Math.sin(car.ang);
+  var gas=keys.gas&&fuel>0, brake=keys.brake;
+  var fx=0,fy=G,tq=0,grounded=0;
+  var P=380*engPower();
+  for(var s=-1;s<=1;s+=2){
+    var lx=s*WX,ly=WY;
+    var rx=lx*c-ly*sn, ry=lx*sn+ly*c;
+    var wx=car.x+rx, wy=car.y+ry;
+    var gy=ground(wx), pen=wy+R-gy;
+    if(pen>0){
+      grounded++;
+      var sl=slope(wx), tn=Math.sqrt(1+sl*sl);
+      var tx=1/tn, ty=sl/tn, nx=sl/tn, ny=-1/tn;
+      var vpx=car.vx-car.w*ry, vpy=car.vy+car.w*rx;
+      var vn=vpx*nx+vpy*ny, vt=vpx*tx+vpy*ty;
+      var fn=K*pen-C*vn; if(fn<0)fn=0; if(fn>3000)fn=3000;
+      var ft=0;
+      if(gas)ft+=P;
+      if(brake){ft+=-Math.max(-500,Math.min(500,vt*6));}
+      else if(!gas){ft+=-vt*1.5;}
+      var lim=mu()*fn; if(ft>lim)ft=lim; if(ft<-lim)ft=-lim;
+      var Fx=fn*nx+ft*tx, Fy=fn*ny+ft*ty;
+      fx+=Fx;fy+=Fy;
+      tq+=rx*Fy-ry*Fx;
+    }
+  }
+  car.onGround=grounded;
+  if(grounded){car.airT=0;}else{
+    car.airT+=dt;
+    if(gas)tq-=9000; if(brake)tq+=9000;
+  }
+  fx-=car.vx*0.9*(grounded?1:0.2);
+  car.vx+=fx*dt; car.vy+=fy*dt; car.w+=tq/I*dt;
+  car.w*=1-0.5*dt;
+  car.x+=car.vx*dt; car.y+=car.vy*dt; car.ang+=car.w*dt;
+  car.spin+=car.vx/R*dt;
+
+  // 翻车判定：头部和车顶碰地
+  c=Math.cos(car.ang);sn=Math.sin(car.ang);
+  var pts=[[0,-28],[-30,-14],[30,-14]];
+  for(var i=0;i<pts.length;i++){
+    var px=car.x+pts[i][0]*c-pts[i][1]*sn, py=car.y+pts[i][0]*sn+pts[i][1]*c;
+    if(py>ground(px)-2){crash('flip');return;}
+  }
+  if(car.y>1500){crash('flip');return;}
+}
+
+// ---------- 主循环 ----------
+var last=0,acc=0;
+function frame(t){
+  requestAnimationFrame(frame);
+  var dt=Math.min((t-last)/1000||0,0.05);last=t;
+  if(state==='play'||state==='over'){
+    if(state==='play'){
+      acc+=dt;
+      var h=1/240;
+      while(acc>=h){step(h);acc-=h;if(state!=='play')break;}
+      if(state==='play'){
+        if(keys.gas&&fuel>0)fuel-=(5+6)*dt;else fuel-=3*dt;
+        if(fuel<0)fuel=0;
+        spawnItems(car.x+2200);
+        for(var i=0;i<items.length;i++){var it=items[i];
+          if(!it.got&&Math.abs(it.x-car.x)<44&&Math.abs(it.y-car.y)<50){
+            it.got=true;
+            if(it.t==='coin'){runCoins++;}else{fuel=Math.min(maxFuel,fuel+maxFuel*0.5);}
+          }}
+        // 没油并停下
+        if(fuel<=0&&Math.abs(car.vx)<45&&car.onGround){stuckT+=dt;if(stuckT>1.5){state='over';finish('fuel');}}else stuckT=0;
+        updateHud();
+      }
+    }
+    for(var j=parts.length-1;j>=0;j--){var p=parts[j];p.vy+=900*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.l-=dt;if(p.l<=0)parts.splice(j,1);}
+    camX+=(car.x-camX)*Math.min(1,dt*6);
+    camY+=(car.y-camY)*Math.min(1,dt*3);
+  }
+  draw();
+}
+
+// ---------- 绘制 ----------
+function draw(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  var sc=Math.max(0.5,Math.min(1.6,H/640));
+  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#5fb4f5');g.addColorStop(1,'#cfeeff');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  var cx=state==='garage'?START_X+200:camX, cy=state==='garage'?ground(START_X+200)-60:camY;
+  // 远景山
+  ctx.fillStyle='#9fd0a8';ctx.beginPath();ctx.moveTo(0,H);
+  for(var x=0;x<=W;x+=20){var wxp=(x-W*.3)/sc+cx*.5;ctx.lineTo(x,H*.62+Math.sin(wxp/260)*40*sc+Math.sin(wxp/90)*10*sc-(cy-420)*.1);}
+  ctx.lineTo(W,H);ctx.fill();
+  ctx.save();
+  ctx.translate(W*.3,H*.55);ctx.scale(sc,sc);ctx.translate(-cx,-cy);
+  var x0=cx-W*.3/sc-20, x1=cx+W*.7/sc+20;
+  // 地面
+  ctx.beginPath();ctx.moveTo(x0,cy+H);
+  var xs=Math.floor(x0/8)*8;
+  for(var xx=xs;xx<=x1;xx+=8)ctx.lineTo(xx,ground(xx));
+  ctx.lineTo(x1,cy+H);ctx.closePath();
+  var dg=ctx.createLinearGradient(0,cy-300,0,cy+400);dg.addColorStop(0,'#8a5a2b');dg.addColorStop(1,'#4a2f15');
+  ctx.fillStyle=dg;ctx.fill();
+  ctx.beginPath();for(var x2=xs;x2<=x1;x2+=8){if(x2===xs)ctx.moveTo(x2,ground(x2));else ctx.lineTo(x2,ground(x2));}
+  ctx.lineWidth=10;ctx.strokeStyle='#4caf50';ctx.lineJoin='round';ctx.stroke();
+  // 道具
+  if(items){for(var i=0;i<items.length;i++){var it=items[i];if(it.got||it.x<x0||it.x>x1)continue;
+    if(it.t==='coin'){ctx.fillStyle='#ffd60a';ctx.strokeStyle='#b8860b';ctx.lineWidth=3;ctx.beginPath();ctx.arc(it.x,it.y,11,0,7);ctx.fill();ctx.stroke();}
+    else{ctx.fillStyle='#e53935';ctx.fillRect(it.x-12,it.y-16,24,32);ctx.fillStyle='#fff';ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillText('⛽',it.x,it.y+6);}}}
+  // 车
+  if(car&&state!=='garage'||state==='garage'){drawCar();}
+  // 碎片
+  ctx.fillStyle='#ff7043';for(var j=0;j<parts.length;j++){ctx.fillRect(parts[j].x,parts[j].y,6,6);}
+  ctx.restore();
+}
+function drawCar(){
+  var cr=car; if(!cr){cr={x:START_X+200,y:ground(START_X+200)-WY-R+8,ang:0,spin:0};}
+  if(state==='over'&&parts.length&&cr)return drawWreck(cr);
+  ctx.save();ctx.translate(cr.x,cr.y);ctx.rotate(cr.ang);
+  // 车身
+  ctx.fillStyle='#e53935';roundRect(-44,-14,88,26,6);ctx.fill();
+  ctx.fillStyle='#ef5350';roundRect(-20,-30,40,18,6);ctx.fill();
+  ctx.fillStyle='#bbdefb';roundRect(-14,-27,28,12,3);ctx.fill();
+  // 车手
+  ctx.fillStyle='#ffcc80';ctx.beginPath();ctx.arc(0,-24,6,0,7);ctx.fill();
+  // 车轮
+  for(var s=-1;s<=1;s+=2){ctx.save();ctx.translate(s*WX,WY);ctx.rotate(cr.spin);
+    ctx.fillStyle='#212121';ctx.beginPath();ctx.arc(0,0,R,0,7);ctx.fill();
+    ctx.fillStyle='#9e9e9e';ctx.beginPath();ctx.arc(0,0,R*.5,0,7);ctx.fill();
+    ctx.fillStyle='#212121';ctx.fillRect(-1.5,-R*.5,3,R);ctx.restore();}
+  ctx.restore();
+}
+function drawWreck(cr){
+  ctx.save();ctx.translate(cr.x,cr.y);ctx.rotate(cr.ang);ctx.globalAlpha=.9;
+  ctx.fillStyle='#b71c1c';roundRect(-44,-14,88,26,6);ctx.fill();ctx.restore();
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+// ---------- HUD / UI ----------
+function setHud(on){document.getElementById('hud').style.display=on?'block':'none';document.getElementById('gas').style.display=on?'flex':'none';document.getElementById('brake').style.display=on?'flex':'none';}
+function updateHud(){
+  document.getElementById('dist').textContent=Math.max(0,Math.floor((car.x-START_X)/10))+' m';
+  document.getElementById('coins').textContent='🪙 '+runCoins;
+  var f=document.getElementById('fuel');f.style.width=(fuel/maxFuel*100)+'%';
+  f.style.background=fuel/maxFuel<.25?'#ff3b30':(fuel/maxFuel<.5?'#ffcc00':'#4cd964');
+}
+function cost(lv){return 40*(lv+1)*(lv+1);}
+function renderGarage(){
+  document.getElementById('gCoins').textContent='🪙 '+save.coins;
+  document.getElementById('gBest').textContent=save.best+' m';
+  [['E','eng'],['T','tank'],['G','grip']].forEach(function(p){
+    var lv=save[p[1]];
+    document.getElementById('lv'+p[0]).textContent='Lv.'+(lv+1);
+    var b=document.getElementById('up'+p[0]);
+    if(lv>=MAX_LV){b.textContent='已满级';b.disabled=true;}
+    else{b.textContent='🪙 '+cost(lv);b.disabled=save.coins<cost(lv);}
+  });
+}
+['E','T','G'].forEach(function(l){
+  var key={E:'eng',T:'tank',G:'grip'}[l];
+  document.getElementById('up'+l).onclick=function(){var lv=save[key];if(lv<MAX_LV&&save.coins>=cost(lv)){save.coins-=cost(lv);save[key]++;persist();renderGarage();}};
+});
+function startRun(){
+  document.getElementById('garage').classList.remove('show');
+  document.getElementById('over').classList.remove('show');
+  newRun();state='play';setHud(true);updateHud();
+}
+function toGarage(){
+  document.getElementById('over').classList.remove('show');
+  state='garage';car=null;items=null;parts=[];setHud(false);renderGarage();
+  document.getElementById('garage').classList.add('show');
+}
+document.getElementById('playBtn').onclick=startRun;
+document.getElementById('retryBtn').onclick=startRun;
+document.getElementById('garageBtn').onclick=toGarage;
+
+// ---------- 输入 ----------
+function bindPedal(id,key){
+  var el=document.getElementById(id);
+  function on(e){e.preventDefault();keys[key]=true;el.classList.add('down');}
+  function off(e){e.preventDefault();keys[key]=false;el.classList.remove('down');}
+  el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);
+  el.addEventListener('pointercancel',off);el.addEventListener('pointerleave',off);
+  el.addEventListener('contextmenu',function(e){e.preventDefault();});
+}
+bindPedal('gas','gas');bindPedal('brake','brake');
+window.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D'||e.key==='ArrowUp')keys.gas=true;
+  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A'||e.key==='ArrowDown')keys.brake=true;
+});
+window.addEventListener('keyup',function(e){
+  if(e.key==='ArrowRight'||e.key==='d'||e.key==='D'||e.key==='ArrowUp')keys.gas=false;
+  if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A'||e.key==='ArrowDown')keys.brake=false;
+});
+document.addEventListener('touchmove',function(e){if(!e.target.closest('.card'))e.preventDefault();},{passive:false});
+
+// 测试钩子
+window.__hc={get state(){return state;},get car(){return car;},get fuel(){return fuel;},keys:keys,start:startRun,get coins(){return runCoins;}};
+
+renderGarage();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
